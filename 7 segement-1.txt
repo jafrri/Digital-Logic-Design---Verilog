@@ -1,0 +1,108 @@
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Seven Segment Display XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+timescale 1ns / 1ps
+
+module seven_segment_display(
+    input [3:0]D,
+    output [6:0]S
+    );
+    
+    assign S[0]=(~D[3]&~D[2]&~D[1]&D[0])|(~D[3]&D[2]&~D[1]&~D[0])|(D[3]&~D[2]&D[1]&D[0])|(D[3]&D[2]&~D[1]&D[0]);
+    assign S[1]=(D[2]&D[1]&~D[0])|(D[3]&D[1]&D[0])|(D[3]&D[2]&~D[0])|(~D[3]&D[2]&~D[1]&D[0]);
+    assign S[2]=(D[3]&D[2]&~D[0])|(D[3]&D[2]&D[1])|(~D[3]&~D[2]&D[1]&~D[0]);
+    assign S[3]=(D[2]&D[1]&D[0])|(D[3]&~D[2]&D[1]&~D[0])|(~D[3]&~D[2]&~D[1]&D[0])|(~D[3]&D[2]&~D[1]&~D[0]);
+    assign S[4]=(~D[3]&D[0])|(~D[2]&~D[1]&D[0])|(~D[3]&D[2]&~D[1]);
+    assign S[5]=(~D[3]&~D[2]&D[0])|(~D[3]&~D[2]&D[1])|(~D[3]&D[1]&D[0])|(D[3]&D[2]&~D[1]&D[0]);
+    assign S[6]=(~D[3]&~D[2]&~D[1])|(~D[3]&D[2]&D[1]&D[0])|(D[3]&D[2]&~D[1]&~D[0]);
+endmodule
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX TestBench XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+timescale 1ns / 1ps
+module segmentDecoderTest();
+  reg [3:0] dD;
+  wire [6:0] dS;
+  
+  //Instantiating the unit under test (UUT)
+  segmentDecoder I1(dD,dS);
+
+  // Stimulus
+  initial
+    begin
+      dD = 4'h0;
+      #10 dD = 4'h1; // h represents hexadecimal 
+      #10 dD = 4'h2;
+      #10 dD = 4'h3;
+      #10 dD = 4'h4;
+      #10 dD = 4'h5;
+      #10 dD = 4'h6;
+      #10 dD = 4'h7;
+      #10 dD = 4'h8;
+      #10 dD = 4'h9;
+      #10 dD = 4'hA;
+      #10 dD = 4'hB;
+      #10 dD = 4'hC;
+      #10 dD = 4'hD;
+      #10 dD = 4'hE;
+      #10 dD = 4'hF;
+      #10 dD = 4’hE;
+	  $monitor("Time=%0d, D=%4b. S=%7b\n", $time, dD, dS );
+    end 
+endmodule
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 3 Bit Adder XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+timescale 1ns / 1ps
+module full_adder(
+    input A,
+    input B,
+    input C,
+    output cout,
+    output S
+    );
+
+    
+//    assign S = (~A&~B&C)|(~A&B&~C)|(A&~B&~C)|(A&B&C); 
+//    assign carry = (B&C)|(A&C)|(A&B);
+
+    assign {cout, S} = A+B+C;
+endmodule
+
+
+module three_bit_adder(
+    input [2:0]A,
+    input [2:0]B,
+    output [2:0]S,
+    output cout
+    );
+    
+    full_adder fa1 (A[0],B[0],1'b0,c1,S[0]);
+    full_adder fa2 (A[1],B[1],c1,c2,S[1]);
+    full_adder fa3 (A[2],B[2],c2,cout,S[2]);  
+
+
+endmodule
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXx 3 Bit Adder Test Bench XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+timescale 1ns / 1ps
+
+module full_adder_test();
+    reg [2:0]A;
+    reg [2:0]B;
+    wire cout;
+    wire [2:0]S;
+    
+    three_bit_adder I2(.A(A),.B(B),.S(S),.cout(cout));
+    initial
+        begin
+            A = 3'b000; B = 3'b000;
+            #50 A = 3'b010; B = 3'b010;
+            #50 A = 3'b111; B = 3'b111;
+            #50 A = 3'b001; B = 3'b111;
+            #50 A = 3'b110; B = 3'b110;
+            
+
+    end 
+endmodule
